@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "380183806858",
+    "project_id": "namangan-toshkent",
+    "storage_bucket": "namangan-toshkent.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:380183806858:android:79f75dcfc99a6ad7003e73",
+        "android_client_info": {
+          "package_name": "com.namangan.toshkent"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCz-22wtKNPqwLWpEg770nWiUe9KWI-J04"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
