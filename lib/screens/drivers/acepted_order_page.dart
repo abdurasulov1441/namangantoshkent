@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:namangantoshkent/screens/drivers/account_screen.dart';
 import 'package:namangantoshkent/style/app_colors.dart';
 import 'package:namangantoshkent/style/app_style.dart';
+import 'package:url_launcher/url_launcher.dart'; // Import the url_launcher package
 
 class AcceptedOrdersPage extends StatefulWidget {
   const AcceptedOrdersPage({super.key});
@@ -16,6 +17,9 @@ class AcceptedOrdersPage extends StatefulWidget {
 class _AcceptedOrdersPageState extends State<AcceptedOrdersPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   late User? _user;
+  Map<String, bool> _loadingReject = {}; // To track loading state for Qaytarish
+  Map<String, bool> _loadingFinalize =
+      {}; // To track loading state for Yakunlash
 
   @override
   void initState() {
@@ -24,6 +28,10 @@ class _AcceptedOrdersPageState extends State<AcceptedOrdersPage> {
   }
 
   Future<void> _rejectOrder(String orderId) async {
+    setState(() {
+      _loadingReject[orderId] = true;
+    });
+
     final orderRef =
         FirebaseFirestore.instance.collection('orders').doc(orderId);
     final driverRef =
@@ -46,10 +54,17 @@ class _AcceptedOrdersPageState extends State<AcceptedOrdersPage> {
     });
 
     _showSnackBar('Buyurtma bekor qilindi');
+    setState(() {
+      _loadingReject[orderId] = false;
+    });
   }
 
   Future<void> _finalizeOrder(
       String orderId, Map<String, dynamic> orderData) async {
+    setState(() {
+      _loadingFinalize[orderId] = true;
+    });
+
     final statsRef = FirebaseFirestore.instance.collection('orderStatistics');
     final orderRef =
         FirebaseFirestore.instance.collection('orders').doc(orderId);
@@ -79,6 +94,23 @@ class _AcceptedOrdersPageState extends State<AcceptedOrdersPage> {
     });
 
     _showSnackBar('Buyurtma yakunlandi va hisobotga qo\'shildi');
+    setState(() {
+      _loadingFinalize[orderId] = false;
+    });
+  }
+
+  Future<void> _makePhoneCall(String phoneNumber) async {
+    final Uri launchUri = Uri(
+      scheme: 'tel',
+      path: phoneNumber.replaceAll(
+          RegExp(r'[^\d+]'), ''), // Remove extra characters
+    );
+    await launchUrl(launchUri);
+    if (await canLaunchUrl(launchUri)) {
+      await launchUrl(launchUri);
+    } else {
+      _showSnackBar('Telefon qo\'ng\'irog\'ini amalga oshirib bo\'lmadi');
+    }
   }
 
   void _showSnackBar(String message) {
@@ -136,7 +168,7 @@ class _AcceptedOrdersPageState extends State<AcceptedOrdersPage> {
 
               // Добавляем 5 часов к orderTime
               final orderTime = orderData['orderTime'].toDate();
-              final orderTimeInUtcPlus5 = orderTime.add(const Duration(hours: 5));
+              final orderTimeInUtcPlus5 = orderTime.add(Duration(hours: 5));
 
               return Card(
                 color: Colors.white,
@@ -156,22 +188,62 @@ class _AcceptedOrdersPageState extends State<AcceptedOrdersPage> {
                       orderType == 'taksi'
                           ? Text('Odamlar soni: ${orderData['peopleCount']}')
                           : Text('Dostavka: ${orderData['itemDescription']}'),
-                      Text('Telefon: ${orderData['phoneNumber']}'),
+                      Row(
+                        children: [
+                          Text('Telefon: ${orderData['phoneNumber']}'),
+                          IconButton(
+                            icon: Icon(
+                              Icons.phone,
+                              color: Colors.green,
+                            ),
+                            onPressed: () =>
+                                _makePhoneCall(orderData['phoneNumber']),
+                          ),
+                        ],
+                      ),
                       Text(
                           'Ketish vaqti: ${DateFormat('yyyy-MM-dd – HH:mm').format(orderTimeInUtcPlus5)}'),
                       const SizedBox(height: 10),
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           ElevatedButton(
-                            onPressed: () => _rejectOrder(order.id),
+                            onPressed: _loadingReject[order.id] == true
+                                ? null
+                                : () => _rejectOrder(order.id),
                             style: ElevatedButton.styleFrom(
-                              shape: const RoundedRectangleBorder(
+                              shape: RoundedRectangleBorder(
                                   borderRadius:
                                       BorderRadius.all(Radius.circular(15))),
-                              backgroundColor: Colors.red,
+                              backgroundColor: AppColors.taxi,
+                            ),
+                            child: _loadingReject[order.id] == true
+                                ? const SizedBox(
+                                    height: 15,
+                                    width: 15,
+                                    child: CircularProgressIndicator(
+                                        color: Colors.white, strokeWidth: 2),
+                                  )
+                                : Text(
+                                    'Qaytarish',
+                                    style: AppStyle.fontStyle.copyWith(
+                                        fontSize: 12,
+                                        color: AppColors.headerColor,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                          ),
+                          const SizedBox(width: 10),
+                          ElevatedButton(
+                            onPressed: () =>
+                                _makePhoneCall(orderData['phoneNumber']),
+                            style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(15))),
+                              backgroundColor: AppColors.taxi,
                             ),
                             child: Text(
-                              'Qaytarish',
+                              'Bog\'lanish',
                               style: AppStyle.fontStyle.copyWith(
                                   fontSize: 12,
                                   color: AppColors.headerColor,
@@ -180,21 +252,29 @@ class _AcceptedOrdersPageState extends State<AcceptedOrdersPage> {
                           ),
                           const SizedBox(width: 10),
                           ElevatedButton(
-                            onPressed: () =>
-                                _finalizeOrder(order.id, orderData),
+                            onPressed: _loadingFinalize[order.id] == true
+                                ? null
+                                : () => _finalizeOrder(order.id, orderData),
                             style: ElevatedButton.styleFrom(
-                              shape: const RoundedRectangleBorder(
+                              shape: RoundedRectangleBorder(
                                   borderRadius:
                                       BorderRadius.all(Radius.circular(15))),
-                              backgroundColor: Colors.green,
+                              backgroundColor: Colors.red,
                             ),
-                            child: Text(
-                              'Yakunlash',
-                              style: AppStyle.fontStyle.copyWith(
-                                  fontSize: 12,
-                                  color: AppColors.headerColor,
-                                  fontWeight: FontWeight.bold),
-                            ),
+                            child: _loadingFinalize[order.id] == true
+                                ? const SizedBox(
+                                    height: 15,
+                                    width: 15,
+                                    child: CircularProgressIndicator(
+                                        color: Colors.white, strokeWidth: 2),
+                                  )
+                                : Text(
+                                    'Yakunlash',
+                                    style: AppStyle.fontStyle.copyWith(
+                                        fontSize: 12,
+                                        color: AppColors.headerColor,
+                                        fontWeight: FontWeight.bold),
+                                  ),
                           ),
                         ],
                       ),

@@ -1,16 +1,16 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:namangantoshkent/screens/drivers/account_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:namangantoshkent/screens/admin/users_page.dart';
 import 'package:namangantoshkent/style/app_colors.dart';
 import 'package:namangantoshkent/style/app_style.dart';
 
-class StatisticsPage extends StatelessWidget {
-  const StatisticsPage({super.key});
+
+
+class MainPage extends StatelessWidget {
+  const MainPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -19,12 +19,13 @@ class StatisticsPage extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const AccountScreen()),
+                MaterialPageRoute(
+                    builder: (context) => const UserManagementPage()),
               );
             },
-            icon: Icon(
-              Icons.person,
-              color: (user == null) ? Colors.white : Colors.white,
+            icon: const Icon(
+              Icons.people,
+              color: Colors.white,
             ),
           ),
         ],
@@ -46,7 +47,6 @@ class StatisticsPage extends StatelessWidget {
           }
 
           final reports = snapshot.data!.docs;
-
           final Map<String, Map<String, dynamic>> userOrderData = {};
 
           for (var report in reports) {
@@ -64,7 +64,6 @@ class StatisticsPage extends StatelessWidget {
               };
             }
 
-            // Counting orders based on the orderType
             if (orderType == 'taksi') {
               userOrderData[email]!['totalOrders'] += orderCount;
               userOrderData[email]!['totalPeople'] += peopleCount;
@@ -76,10 +75,7 @@ class StatisticsPage extends StatelessWidget {
 
           return ListView(
             children: userOrderData.entries.map((entry) {
-              // Extracting the part before '@' from the email
               String username = entry.key.split('@').first;
-
-              // Capitalizing the first letter of the username
               if (username.isNotEmpty) {
                 username = username[0].toUpperCase() + username.substring(1);
               }

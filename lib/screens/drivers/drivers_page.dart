@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:namangantoshkent/screens/drivers/acepted_order_page.dart';
 import 'package:namangantoshkent/screens/drivers/orders.dart';
 import 'package:namangantoshkent/screens/drivers/statistics_page.dart';
@@ -19,56 +20,92 @@ class _DriverPageState extends State<DriverPage> {
     super.initState();
   }
 
+  Widget _buildNavItem({
+    required String iconPath,
+    required String label,
+    required bool isSelected,
+  }) {
+    return Column(
+      mainAxisSize: MainAxisSize.min, // Minimize the vertical space used
+      mainAxisAlignment: MainAxisAlignment.center, // Center the items
+      children: [
+        if (isSelected)
+          Container(
+            height: 3, // Thinner line to save space
+            width: double.infinity,
+            color: AppColors.taxi, // Line color for selected item
+          ),
+        const SizedBox(height: 4), // Reduce space between line and icon
+        SvgPicture.asset(
+          iconPath,
+          width: 24,
+          height: 24,
+          color: isSelected ? AppColors.taxi : Colors.grey,
+        ),
+        const SizedBox(height: 2), // Reduce space between icon and text
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12, // Keep font size compact
+            color: isSelected ? AppColors.taxi : Colors.grey,
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
-        children: const [
+        children: [
           Orders(),
           AcceptedOrdersPage(),
           StatisticsPage(),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.list),
-            label: 'Buyurtmalar',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.check),
-            label: 'Qabul qilingan',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.stacked_bar_chart),
-            label: 'Statistika',
-          ),
-        ],
-        selectedItemColor: AppColors.taxi,
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.only(bottom: 0), // No extra bottom padding
+        child: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed, // Prevent resizing on tap
+          currentIndex: _currentIndex,
+          onTap: (index) {
+            setState(() {
+              _currentIndex = index;
+            });
+          },
+          items: [
+            BottomNavigationBarItem(
+              icon: _buildNavItem(
+                iconPath: 'assets/icons/orders.svg',
+                label: 'Buyurtmalar',
+                isSelected: _currentIndex == 0,
+              ),
+              label: '',
+            ),
+            BottomNavigationBarItem(
+              icon: _buildNavItem(
+                iconPath: 'assets/icons/accepted.svg',
+                label: 'Qabul qilingan',
+                isSelected: _currentIndex == 1,
+              ),
+              label: '',
+            ),
+            BottomNavigationBarItem(
+              icon: _buildNavItem(
+                iconPath: 'assets/icons/statistics.svg',
+                label: 'Statistika',
+                isSelected: _currentIndex == 2,
+              ),
+              label: '',
+            ),
+          ],
+          selectedItemColor: AppColors.taxi,
+          backgroundColor: Colors.white,
+          elevation: 8, // Keeps slight elevation for effect
+        ),
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   elevation: 5,
-      //   backgroundColor: Colors.white,
-      //   shape: RoundedRectangleBorder(
-      //       borderRadius: BorderRadius.all(Radius.circular(30))),
-      //   onPressed: () {
-      //     Navigator.push(
-      //       context,
-      //       MaterialPageRoute(builder: (context) => ChatPage()),
-      //     );
-      //   },
-      //   child: Icon(
-      //     Icons.chat,
-      //     color: AppColors.taxi,
-      //   ),
-      // ),
     );
   }
 }
