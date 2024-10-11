@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:namangantoshkent/screens/drivers/account_screen.dart';
 import 'package:namangantoshkent/style/app_colors.dart';
 import 'package:namangantoshkent/style/app_style.dart';
-import 'package:url_launcher/url_launcher.dart'; // Import the url_launcher package
+import 'package:url_launcher/url_launcher.dart';
 
 class AcceptedOrdersPage extends StatefulWidget {
   const AcceptedOrdersPage({super.key});
@@ -17,6 +17,8 @@ class AcceptedOrdersPage extends StatefulWidget {
 class _AcceptedOrdersPageState extends State<AcceptedOrdersPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   late User? _user;
+  bool _isAccountValid = false;
+  bool _isLoading = true;
   Map<String, bool> _loadingReject = {}; // To track loading state for Qaytarish
   Map<String, bool> _loadingFinalize =
       {}; // To track loading state for Yakunlash
@@ -25,6 +27,38 @@ class _AcceptedOrdersPageState extends State<AcceptedOrdersPage> {
   void initState() {
     super.initState();
     _user = _auth.currentUser;
+    _checkAccountStatus();
+  }
+
+  Future<void> _checkAccountStatus() async {
+    if (_user == null) {
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
+    final userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(_user!.uid)
+        .get();
+
+    if (userDoc.exists) {
+      final data = userDoc.data()!;
+      final disabled = data['disabled'] as bool? ?? false;
+      final expiryDate = (data['expiry_date'] as Timestamp?)?.toDate();
+
+      setState(() {
+        _isAccountValid = !disabled &&
+            expiryDate != null &&
+            expiryDate.isAfter(DateTime.now());
+        _isLoading = false;
+      });
+    } else {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _rejectOrder(String orderId) async {
@@ -48,7 +82,6 @@ class _AcceptedOrdersPageState extends State<AcceptedOrdersPage> {
           'driverId': null,
           'driverPhoneNumber': null,
         });
-
         transaction.delete(driverSnapshot.reference);
       }
     });
@@ -77,7 +110,6 @@ class _AcceptedOrdersPageState extends State<AcceptedOrdersPage> {
       final orderType = orderData['orderType'] ?? 'unknown';
       final itemDescription = orderData['itemDescription'] ?? '';
 
-      // Store the statistics in the `orderStatistics` collection
       transaction.set(statsRef.doc(), {
         'completedBy': driverEmail,
         'orderCount': 1,
@@ -87,9 +119,7 @@ class _AcceptedOrdersPageState extends State<AcceptedOrdersPage> {
         'completedAt': Timestamp.now(),
       });
 
-      // Remove the order from the driver's accepted orders
       transaction.delete(driverRef.collection('acceptedOrders').doc(orderId));
-      // Remove the order from the main `orders` collection
       transaction.delete(orderRef);
     });
 
@@ -105,7 +135,7 @@ class _AcceptedOrdersPageState extends State<AcceptedOrdersPage> {
       path: phoneNumber.replaceAll(
           RegExp(r'[^\d+]'), ''), // Remove extra characters
     );
-    await launchUrl(launchUri);
+
     if (await canLaunchUrl(launchUri)) {
       await launchUrl(launchUri);
     } else {
@@ -121,10 +151,59 @@ class _AcceptedOrdersPageState extends State<AcceptedOrdersPage> {
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    if (!_isAccountValid) {
+      return Scaffold(
+        appBar: AppBar(
+          centerTitle: true,
+          backgroundColor: AppColors.taxi,
+          title: Text(
+            'Qabul qilingan arizalar',
+            style: AppStyle.fontStyle.copyWith(
+                color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+        ),
+        body: Center(
+          child: Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            elevation: 5,
+            margin: const EdgeInsets.all(20),
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.lock, size: 60, color: AppColors.taxi),
+                  const SizedBox(height: 15),
+                  Text(
+                    'Xizmatdan foydalanish uchun oylik to\'lovni amalga oshiring',
+                    textAlign: TextAlign.center,
+                    style: AppStyle.fontStyle.copyWith(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
+        backgroundColor: AppColors.taxi,
         title: Text(
           'Qabul qilingan arizalar',
           style: AppStyle.fontStyle.copyWith(
@@ -138,13 +217,9 @@ class _AcceptedOrdersPageState extends State<AcceptedOrdersPage> {
                 MaterialPageRoute(builder: (context) => const AccountScreen()),
               );
             },
-            icon: Icon(
-              Icons.person,
-              color: (user == null) ? Colors.white : Colors.white,
-            ),
+            icon: Icon(Icons.person, color: Colors.white),
           ),
         ],
-        backgroundColor: AppColors.taxi,
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
@@ -165,8 +240,6 @@ class _AcceptedOrdersPageState extends State<AcceptedOrdersPage> {
               final order = orders[index];
               final orderData = order.data() as Map<String, dynamic>;
               final orderType = orderData['orderType'];
-
-              // Добавляем 5 часов к orderTime
               final orderTime = orderData['orderTime'].toDate();
               final orderTimeInUtcPlus5 = orderTime.add(Duration(hours: 5));
 
@@ -192,17 +265,15 @@ class _AcceptedOrdersPageState extends State<AcceptedOrdersPage> {
                         children: [
                           Text('Telefon: ${orderData['phoneNumber']}'),
                           IconButton(
-                            icon: Icon(
-                              Icons.phone,
-                              color: Colors.green,
-                            ),
+                            icon: Icon(Icons.phone, color: Colors.green),
                             onPressed: () =>
                                 _makePhoneCall(orderData['phoneNumber']),
                           ),
                         ],
                       ),
                       Text(
-                          'Ketish vaqti: ${DateFormat('yyyy-MM-dd – HH:mm').format(orderTimeInUtcPlus5)}'),
+                        'Ketish vaqti: ${DateFormat('yyyy-MM-dd – HH:mm').format(orderTimeInUtcPlus5)}',
+                      ),
                       const SizedBox(height: 10),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,

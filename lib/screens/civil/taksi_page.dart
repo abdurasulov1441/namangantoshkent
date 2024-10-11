@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:namangantoshkent/style/app_colors.dart';
 import 'package:namangantoshkent/style/app_style.dart';
+import 'package:flutter/services.dart';
+import 'dart:math';
 
 class TaxiPage extends StatefulWidget {
   const TaxiPage({super.key});
@@ -15,7 +17,8 @@ class _TaxiPageState extends State<TaxiPage> {
   String fromLocation = 'Namangan';
   String toLocation = 'Toshkent';
 
-  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _phoneController =
+      TextEditingController(text: '+998 ');
 
   final List<String> _periodOptions = [
     'Tanlanmadi',
@@ -29,6 +32,44 @@ class _TaxiPageState extends State<TaxiPage> {
   String _selectedPeriod = 'Tanlanmadi';
   String _selectedPeople = 'Tanlanmadi';
   DateTime? _selectedDateTime;
+
+  // Phone number formatter similar to the SignUpScreen
+  final _phoneNumberFormatter = TextInputFormatter.withFunction(
+    (oldValue, newValue) {
+      if (!newValue.text.startsWith('+998 ')) {
+        return oldValue;
+      }
+
+      String text = newValue.text.substring(5).replaceAll(RegExp(r'\D'), '');
+
+      if (text.length > 9) {
+        text = text.substring(0, 9);
+      }
+
+      StringBuffer formatted = StringBuffer('+998 ');
+      int selectionIndex = newValue.selection.baseOffset;
+
+      if (text.length > 0)
+        formatted.write('(${text.substring(0, min(2, text.length))}');
+      if (text.length > 2)
+        formatted.write(') ${text.substring(2, min(5, text.length))}');
+      if (text.length > 5)
+        formatted.write(' ${text.substring(5, min(7, text.length))}');
+      if (text.length > 7)
+        formatted.write(' ${text.substring(7, text.length)}');
+
+      selectionIndex = formatted.length;
+
+      if (newValue.selection.baseOffset < 5) {
+        selectionIndex = 5;
+      }
+
+      return TextEditingValue(
+        text: formatted.toString(),
+        selection: TextSelection.collapsed(offset: selectionIndex),
+      );
+    },
+  );
 
   void _swapLocations() {
     setState(() {
@@ -169,14 +210,14 @@ class _TaxiPageState extends State<TaxiPage> {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _swapLocations,
+              child: const Icon(
+                Icons.swap_calls,
+                color: Colors.black,
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.taxi,
                 shape: const CircleBorder(),
                 padding: const EdgeInsets.all(16),
-              ),
-              child: const Icon(
-                Icons.swap_calls,
-                color: Colors.black,
               ),
             ),
             const SizedBox(height: 20),
@@ -223,24 +264,27 @@ class _TaxiPageState extends State<TaxiPage> {
               controller: _phoneController,
               hintText: 'Telefon raqamingizni kiriting',
               keyboardType: TextInputType.phone,
+              inputFormatters: [
+                _phoneNumberFormatter
+              ], // Apply phone formatter here
             ),
             const SizedBox(height: 30),
             ElevatedButton(
               onPressed: _submitData,
-              style: ElevatedButton.styleFrom(
-                shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(15))),
-                backgroundColor: AppColors.taxi,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                textStyle: const TextStyle(fontSize: 18),
-              ),
               child: Text(
                 'Yuborish',
                 style: AppStyle.fontStyle.copyWith(
                     color: Colors.white,
                     fontSize: 15,
                     fontWeight: FontWeight.bold),
+              ),
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(15))),
+                backgroundColor: AppColors.taxi,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                textStyle: const TextStyle(fontSize: 18),
               ),
             ),
             const SizedBox(
@@ -320,9 +364,9 @@ class _TaxiPageState extends State<TaxiPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Text(
+        Text(
           'Tanlangan vaqt:',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         Text(
           formattedDate,
@@ -352,10 +396,12 @@ class _TaxiPageState extends State<TaxiPage> {
     required TextEditingController controller,
     required String hintText,
     TextInputType keyboardType = TextInputType.text,
+    List<TextInputFormatter>? inputFormatters,
   }) {
     return TextField(
       controller: controller,
       keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
       decoration: InputDecoration(
         prefixIcon: const Icon(
           Icons.phone,

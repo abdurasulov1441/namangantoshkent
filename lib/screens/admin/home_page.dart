@@ -1,19 +1,39 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:namangantoshkent/screens/admin/users_page.dart';
 import 'package:namangantoshkent/style/app_colors.dart';
 import 'package:namangantoshkent/style/app_style.dart';
 
-
-
-class MainPage extends StatelessWidget {
+class MainPage extends StatefulWidget {
   const MainPage({super.key});
+
+  @override
+  State<MainPage> createState() => _MainPageState();
+}
+
+class _MainPageState extends State<MainPage> {
+  Future<void> signOut() async {
+    final navigator = Navigator.of(context);
+
+    await FirebaseAuth.instance.signOut();
+
+    navigator.pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(
+            Icons.logout,
+            color: Colors.white,
+          ),
+          tooltip: 'Chiqish',
+          onPressed: () => signOut(),
+        ),
         actions: [
           IconButton(
             onPressed: () {

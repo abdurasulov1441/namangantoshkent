@@ -201,8 +201,8 @@ class _UserManagementPageState extends State<UserManagementPage> {
                     ),
                     IconButton(
                       icon: Icon(
-                        isDisabled ? Icons.lock_open : Icons.lock,
-                        color: isDisabled ? Colors.green : Colors.red,
+                        isDisabled ? Icons.lock : Icons.lock_open,
+                        color: isDisabled ? Colors.red : Colors.green,
                       ),
                       onPressed: () => FirebaseFirestore.instance
                           .collection('users')

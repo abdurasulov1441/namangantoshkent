@@ -44,6 +44,8 @@ dependencies:
   d_chart: ^2.9.0
   url_launcher: ^6.3.1
   flutter_svg: ^2.0.10+1
+  permission_handler: ^11.3.1
+  android_intent_plus: ^5.1.0
 
 dev_dependencies:
   flutter_test:

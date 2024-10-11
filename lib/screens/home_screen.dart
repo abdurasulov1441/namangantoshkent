@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:namangantoshkent/screens/admin/users_page.dart';
+import 'package:namangantoshkent/screens/admin/home_page.dart';
+
 import 'package:namangantoshkent/screens/civil/civil_page.dart';
 import 'package:namangantoshkent/screens/drivers/drivers_page.dart';
-
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -35,7 +35,7 @@ class HomeScreen extends StatelessWidget {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           } else if (snapshot.hasData && snapshot.data == true) {
-            return UserManagementPage(); // If the user is admin, go to AdminPage
+            return MainPage(); // If the user is admin, go to AdminPage
           } else {
             return DriverPage(); // Otherwise, go to DriverPage
           }

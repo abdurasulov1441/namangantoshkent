@@ -15,14 +15,48 @@ class Orders extends StatefulWidget {
 
 class _OrdersState extends State<Orders> {
   User? _user;
+  bool _isAccountValid = false;
+  bool _isLoading = true;
   Map<String, bool> _loadingOrders = {};
   List<DocumentSnapshot> _orders = [];
-  String _selectedFilter = 'Barchasi'; // Updated filter state with 'Barchasi'
+  String _selectedFilter = 'Barchasi';
 
   @override
   void initState() {
     super.initState();
     _user = FirebaseAuth.instance.currentUser;
+    _checkAccountStatus();
+  }
+
+  Future<void> _checkAccountStatus() async {
+    if (_user == null) {
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
+    final userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(_user!.uid)
+        .get();
+
+    if (userDoc.exists) {
+      final data = userDoc.data()!;
+      final disabled = data['disabled'] as bool? ?? false;
+      final expiryDate = (data['expiry_date'] as Timestamp?)?.toDate();
+
+      setState(() {
+        _isAccountValid = !disabled &&
+            expiryDate != null &&
+            expiryDate.isAfter(DateTime.now());
+        _isLoading = false;
+      });
+    } else {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _handleOrderAcceptance(String orderId, String orderType) async {
@@ -58,7 +92,7 @@ class _OrdersState extends State<Orders> {
 
       _showSnackBar('Buyurtma qabul qilindi');
       setState(() {
-        _orders.removeWhere((order) => order.id == orderId); // Remove the card
+        _orders.removeWhere((order) => order.id == orderId);
       });
     } catch (e) {
       _showSnackBar('Error accepting order: $e');
@@ -81,7 +115,55 @@ class _OrdersState extends State<Orders> {
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (!_isAccountValid) {
+      return Scaffold(
+        appBar: AppBar(
+          centerTitle: true,
+          backgroundColor: AppColors.taxi,
+          title: Text(
+            'Barcha buyurtmalar',
+            style: AppStyle.fontStyle.copyWith(
+                color: AppColors.backgroundColor,
+                fontSize: 20,
+                fontWeight: FontWeight.bold),
+          ),
+        ),
+        body: Center(
+          child: Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            elevation: 5,
+            margin: const EdgeInsets.all(20),
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.lock, size: 60, color: AppColors.taxi),
+                  const SizedBox(height: 15),
+                  Text(
+                    'Xizmatdan foydalanish uchun oylik to\'lovni amalga oshiring',
+                    textAlign: TextAlign.center,
+                    style: AppStyle.fontStyle.copyWith(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         actions: [
@@ -94,7 +176,7 @@ class _OrdersState extends State<Orders> {
             },
             icon: Icon(
               Icons.person,
-              color: (user == null) ? Colors.white : Colors.white,
+              color: Colors.white,
             ),
           ),
         ],
@@ -110,27 +192,25 @@ class _OrdersState extends State<Orders> {
       ),
       body: Column(
         children: [
-          // Filter Row containing the text and dropdown
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Buyurtmani tanlang', // Text for the filter label
+                  'Buyurtmani tanlang',
                   style: AppStyle.fontStyle.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                // Dropdown Button for filtering with outline style
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.only(left: 8.0),
                     child: DropdownButtonFormField<String>(
                       decoration: InputDecoration(
                         contentPadding: const EdgeInsets.symmetric(
-                          vertical: 5.0, // Reduced vertical padding
+                          vertical: 5.0,
                           horizontal: 12.0,
                         ),
                         border: OutlineInputBorder(
@@ -169,7 +249,6 @@ class _OrdersState extends State<Orders> {
               ],
             ),
           ),
-          // Orders List
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
@@ -183,7 +262,6 @@ class _OrdersState extends State<Orders> {
 
                 _orders = snapshot.data!.docs;
 
-                // Apply filtering based on the selected filter
                 List<DocumentSnapshot> filteredOrders = _orders.where((order) {
                   final orderData = order.data() as Map<String, dynamic>;
                   if (_selectedFilter == 'Barchasi') {
@@ -204,11 +282,9 @@ class _OrdersState extends State<Orders> {
                     final order = filteredOrders[index];
                     final orderData = order.data() as Map<String, dynamic>;
                     final orderType = orderData['orderType'];
-
                     final orderTime = orderData['orderTime'].toDate();
                     final orderTimeInUtcPlus5 =
                         orderTime.add(Duration(hours: 5));
-
                     final isLoading = _loadingOrders[order.id] ?? false;
 
                     return Card(
