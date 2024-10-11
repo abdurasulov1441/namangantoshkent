@@ -29,14 +29,11 @@ android {
     }
 
     defaultConfig {
-        // Specify the application ID
-        applicationId = "com.namangan.toshkent"
-
-        // Set the minSdkVersion to 23 as required by Firebase
-        minSdkVersion 23
-        targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+        applicationId "com.example.namangantoshkent"
+        minSdkVersion 21
+        targetSdkVersion 33
+        versionCode 1
+        versionName "1.0"
     }
 
     signingConfigs {

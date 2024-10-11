@@ -7,8 +7,6 @@ import 'package:namangantoshkent/screens/civil/taksi_page.dart';
 import 'package:namangantoshkent/screens/sign/login_screen.dart';
 import 'package:namangantoshkent/style/app_colors.dart';
 import 'package:namangantoshkent/style/app_style.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class MainCivilPage extends StatefulWidget {
   const MainCivilPage({super.key});

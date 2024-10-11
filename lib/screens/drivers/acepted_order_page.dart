@@ -1,3 +1,5 @@
+import 'package:android_intent_plus/android_intent.dart';
+import 'package:android_intent_plus/flag.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -5,7 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:namangantoshkent/screens/drivers/account_screen.dart';
 import 'package:namangantoshkent/style/app_colors.dart';
 import 'package:namangantoshkent/style/app_style.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class AcceptedOrdersPage extends StatefulWidget {
   const AcceptedOrdersPage({super.key});
@@ -59,6 +61,34 @@ class _AcceptedOrdersPageState extends State<AcceptedOrdersPage> {
         _isLoading = false;
       });
     }
+  }
+
+  Future<void> _makePhoneCall(String phoneNumber) async {
+    // Request CALL_PHONE permission
+    final status = await Permission.phone.request();
+
+    if (status.isGranted) {
+      final intent = AndroidIntent(
+        action: 'android.intent.action.CALL',
+        data: 'tel:$phoneNumber',
+        flags: <int>[Flag.FLAG_ACTIVITY_NEW_TASK],
+      );
+
+      try {
+        await intent.launch();
+      } catch (e) {
+        _showSnackBar(
+            'Qo\'ng\'iroq amalga oshirilmadi. Iltimos, telefon sozlamalarini tekshiring.');
+      }
+    } else {
+      _showSnackBar('Qo‘ng‘iroq qilish uchun ruxsat talab qilinadi');
+    }
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   Future<void> _rejectOrder(String orderId) async {
@@ -127,26 +157,6 @@ class _AcceptedOrdersPageState extends State<AcceptedOrdersPage> {
     setState(() {
       _loadingFinalize[orderId] = false;
     });
-  }
-
-  Future<void> _makePhoneCall(String phoneNumber) async {
-    final Uri launchUri = Uri(
-      scheme: 'tel',
-      path: phoneNumber.replaceAll(
-          RegExp(r'[^\d+]'), ''), // Remove extra characters
-    );
-
-    if (await canLaunchUrl(launchUri)) {
-      await launchUrl(launchUri);
-    } else {
-      _showSnackBar('Telefon qo\'ng\'irog\'ini amalga oshirib bo\'lmadi');
-    }
-  }
-
-  void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
   }
 
   @override
