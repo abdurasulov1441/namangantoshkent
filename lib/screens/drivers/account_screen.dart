@@ -170,11 +170,11 @@ class _AccountScreenState extends State<AccountScreen> {
                                 height: 10,
                                 color: Colors.red[300],
                               ),
-                              SizedBox(
+                              const SizedBox(
                                 width: 5,
                               ),
-                              Text('Jami buyurtmalar'),
-                              SizedBox(
+                              const Text('Jami buyurtmalar'),
+                              const SizedBox(
                                 width: 5,
                               ),
                               Container(
@@ -182,10 +182,10 @@ class _AccountScreenState extends State<AccountScreen> {
                                 height: 10,
                                 color: Colors.green[300],
                               ),
-                              SizedBox(
+                              const SizedBox(
                                 width: 5,
                               ),
-                              Text('Odamlar soni'),
+                              const Text('Odamlar soni'),
                             ],
                           ),
                           Row(
@@ -196,10 +196,10 @@ class _AccountScreenState extends State<AccountScreen> {
                                 height: 10,
                                 color: Colors.orange[300],
                               ),
-                              SizedBox(
+                              const SizedBox(
                                 width: 5,
                               ),
-                              Text('Dastavka soni'),
+                              const Text('Dastavka soni'),
                             ],
                           )
                         ],

@@ -49,14 +49,18 @@ class _TaxiPageState extends State<TaxiPage> {
       StringBuffer formatted = StringBuffer('+998 ');
       int selectionIndex = newValue.selection.baseOffset;
 
-      if (text.length > 0)
+      if (text.isNotEmpty) {
         formatted.write('(${text.substring(0, min(2, text.length))}');
-      if (text.length > 2)
+      }
+      if (text.length > 2) {
         formatted.write(') ${text.substring(2, min(5, text.length))}');
-      if (text.length > 5)
+      }
+      if (text.length > 5) {
         formatted.write(' ${text.substring(5, min(7, text.length))}');
-      if (text.length > 7)
+      }
+      if (text.length > 7) {
         formatted.write(' ${text.substring(7, text.length)}');
+      }
 
       selectionIndex = formatted.length;
 
@@ -210,14 +214,14 @@ class _TaxiPageState extends State<TaxiPage> {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _swapLocations,
-              child: const Icon(
-                Icons.swap_calls,
-                color: Colors.black,
-              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.taxi,
                 shape: const CircleBorder(),
                 padding: const EdgeInsets.all(16),
+              ),
+              child: const Icon(
+                Icons.swap_calls,
+                color: Colors.black,
               ),
             ),
             const SizedBox(height: 20),
@@ -271,20 +275,20 @@ class _TaxiPageState extends State<TaxiPage> {
             const SizedBox(height: 30),
             ElevatedButton(
               onPressed: _submitData,
+              style: ElevatedButton.styleFrom(
+                shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(15))),
+                backgroundColor: AppColors.taxi,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                textStyle: const TextStyle(fontSize: 18),
+              ),
               child: Text(
                 'Yuborish',
                 style: AppStyle.fontStyle.copyWith(
                     color: Colors.white,
                     fontSize: 15,
                     fontWeight: FontWeight.bold),
-              ),
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(15))),
-                backgroundColor: AppColors.taxi,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                textStyle: const TextStyle(fontSize: 18),
               ),
             ),
             const SizedBox(
@@ -364,9 +368,9 @@ class _TaxiPageState extends State<TaxiPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
+        const Text(
           'Tanlangan vaqt:',
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         Text(
           formattedDate,

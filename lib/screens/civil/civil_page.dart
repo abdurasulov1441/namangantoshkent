@@ -31,7 +31,7 @@ class _MainCivilPageState extends State<MainCivilPage> {
 
   Future<void> _makePhoneCall() async {
     const phoneNumber = '1250';
-    final intent = AndroidIntent(
+    final intent = const AndroidIntent(
       action: 'android.intent.action.CALL',
       data: 'tel:$phoneNumber',
       flags: <int>[Flag.FLAG_ACTIVITY_NEW_TASK],
@@ -63,7 +63,7 @@ class _MainCivilPageState extends State<MainCivilPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
+                const Icon(
                   Icons.phone_in_talk,
                   size: 60,
                   color: AppColors.taxi,

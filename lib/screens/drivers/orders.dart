@@ -17,7 +17,7 @@ class _OrdersState extends State<Orders> {
   User? _user;
   bool _isAccountValid = false;
   bool _isLoading = true;
-  Map<String, bool> _loadingOrders = {};
+  final Map<String, bool> _loadingOrders = {};
   List<DocumentSnapshot> _orders = [];
   String _selectedFilter = 'Barchasi';
 
@@ -146,7 +146,7 @@ class _OrdersState extends State<Orders> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.lock, size: 60, color: AppColors.taxi),
+                  const Icon(Icons.lock, size: 60, color: AppColors.taxi),
                   const SizedBox(height: 15),
                   Text(
                     'Xizmatdan foydalanish uchun oylik to\'lovni amalga oshiring',
@@ -174,7 +174,7 @@ class _OrdersState extends State<Orders> {
                 MaterialPageRoute(builder: (context) => const AccountScreen()),
               );
             },
-            icon: Icon(
+            icon: const Icon(
               Icons.person,
               color: Colors.white,
             ),
@@ -216,12 +216,12 @@ class _OrdersState extends State<Orders> {
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(15.0),
                           borderSide:
-                              BorderSide(color: AppColors.taxi, width: 2),
+                              const BorderSide(color: AppColors.taxi, width: 2),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(15.0),
                           borderSide:
-                              BorderSide(color: AppColors.taxi, width: 2),
+                              const BorderSide(color: AppColors.taxi, width: 2),
                         ),
                       ),
                       value: _selectedFilter,
@@ -284,7 +284,7 @@ class _OrdersState extends State<Orders> {
                     final orderType = orderData['orderType'];
                     final orderTime = orderData['orderTime'].toDate();
                     final orderTimeInUtcPlus5 =
-                        orderTime.add(Duration(hours: 5));
+                        orderTime.add(const Duration(hours: 5));
                     final isLoading = _loadingOrders[order.id] ?? false;
 
                     return Card(

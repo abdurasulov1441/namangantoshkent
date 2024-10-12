@@ -59,7 +59,7 @@ class _DriverPageState extends State<DriverPage> {
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
-        children: [
+        children: const [
           Orders(),
           AcceptedOrdersPage(),
           StatisticsPage(),

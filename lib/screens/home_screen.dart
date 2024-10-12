@@ -27,17 +27,17 @@ class HomeScreen extends StatelessWidget {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
-      return MainCivilPage();
+      return const MainCivilPage();
     } else {
       return FutureBuilder<bool>(
         future: isAdmin(user.email!),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasData && snapshot.data == true) {
-            return MainPage(); // If the user is admin, go to AdminPage
+            return const MainPage(); // If the user is admin, go to AdminPage
           } else {
-            return DriverPage(); // Otherwise, go to DriverPage
+            return const DriverPage(); // Otherwise, go to DriverPage
           }
         },
       );

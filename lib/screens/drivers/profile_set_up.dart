@@ -6,6 +6,8 @@ class ProfilePage extends StatelessWidget {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
 
+  ProfilePage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -16,11 +18,11 @@ class ProfilePage extends StatelessWidget {
           children: [
             TextField(
               controller: _nameController,
-              decoration: InputDecoration(labelText: 'Name'),
+              decoration: const InputDecoration(labelText: 'Name'),
             ),
             TextField(
               controller: _phoneController,
-              decoration: InputDecoration(labelText: 'Phone Number'),
+              decoration: const InputDecoration(labelText: 'Phone Number'),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -34,7 +36,7 @@ class ProfilePage extends StatelessWidget {
                 });
                 Navigator.pushReplacementNamed(context, '/chat');
               },
-              child: Text('Save'),
+              child: const Text('Save'),
             ),
           ],
         ),

@@ -21,8 +21,8 @@ class _AcceptedOrdersPageState extends State<AcceptedOrdersPage> {
   late User? _user;
   bool _isAccountValid = false;
   bool _isLoading = true;
-  Map<String, bool> _loadingReject = {}; // To track loading state for Qaytarish
-  Map<String, bool> _loadingFinalize =
+  final Map<String, bool> _loadingReject = {}; // To track loading state for Qaytarish
+  final Map<String, bool> _loadingFinalize =
       {}; // To track loading state for Yakunlash
 
   @override
@@ -192,7 +192,7 @@ class _AcceptedOrdersPageState extends State<AcceptedOrdersPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.lock, size: 60, color: AppColors.taxi),
+                  const Icon(Icons.lock, size: 60, color: AppColors.taxi),
                   const SizedBox(height: 15),
                   Text(
                     'Xizmatdan foydalanish uchun oylik to\'lovni amalga oshiring',
@@ -227,7 +227,7 @@ class _AcceptedOrdersPageState extends State<AcceptedOrdersPage> {
                 MaterialPageRoute(builder: (context) => const AccountScreen()),
               );
             },
-            icon: Icon(Icons.person, color: Colors.white),
+            icon: const Icon(Icons.person, color: Colors.white),
           ),
         ],
       ),
@@ -251,7 +251,7 @@ class _AcceptedOrdersPageState extends State<AcceptedOrdersPage> {
               final orderData = order.data() as Map<String, dynamic>;
               final orderType = orderData['orderType'];
               final orderTime = orderData['orderTime'].toDate();
-              final orderTimeInUtcPlus5 = orderTime.add(Duration(hours: 5));
+              final orderTimeInUtcPlus5 = orderTime.add(const Duration(hours: 5));
 
               return Card(
                 color: Colors.white,
@@ -275,7 +275,7 @@ class _AcceptedOrdersPageState extends State<AcceptedOrdersPage> {
                         children: [
                           Text('Telefon: ${orderData['phoneNumber']}'),
                           IconButton(
-                            icon: Icon(Icons.phone, color: Colors.green),
+                            icon: const Icon(Icons.phone, color: Colors.green),
                             onPressed: () =>
                                 _makePhoneCall(orderData['phoneNumber']),
                           ),
@@ -293,7 +293,7 @@ class _AcceptedOrdersPageState extends State<AcceptedOrdersPage> {
                                 ? null
                                 : () => _rejectOrder(order.id),
                             style: ElevatedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
+                              shape: const RoundedRectangleBorder(
                                   borderRadius:
                                       BorderRadius.all(Radius.circular(15))),
                               backgroundColor: AppColors.taxi,
@@ -318,7 +318,7 @@ class _AcceptedOrdersPageState extends State<AcceptedOrdersPage> {
                             onPressed: () =>
                                 _makePhoneCall(orderData['phoneNumber']),
                             style: ElevatedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
+                              shape: const RoundedRectangleBorder(
                                   borderRadius:
                                       BorderRadius.all(Radius.circular(15))),
                               backgroundColor: AppColors.taxi,
@@ -337,7 +337,7 @@ class _AcceptedOrdersPageState extends State<AcceptedOrdersPage> {
                                 ? null
                                 : () => _finalizeOrder(order.id, orderData),
                             style: ElevatedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
+                              shape: const RoundedRectangleBorder(
                                   borderRadius:
                                       BorderRadius.all(Radius.circular(15))),
                               backgroundColor: Colors.red,
